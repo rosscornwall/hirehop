@@ -20,7 +20,6 @@
     var ASSIGNED_USER_ID = 1; // Ross Cornwall
     var TASK_DUE_DAYS = 2;
     var TASK_TITLE = "🧹 Data Cleanup: {company}";
-    var TASK_DESCRIPTION = "Review and complete company details:\n\n• Address\n• Phone number\n• Email\n• Payment terms\n• VAT number\n• Notes";
 
     // =====================================================
     // PLUGIN CODE
@@ -77,34 +76,41 @@
 
         function createCleanupTask(companyName, companyId) {
             
-            // Calculate due date
+            // Calculate dates
+            var today = new Date();
             var dueDate = new Date();
             dueDate.setDate(dueDate.getDate() + TASK_DUE_DAYS);
-            var dueDateStr = dueDate.toISOString().split('T')[0] + ' 09:00:00';
             
-            // Build task title and description
-            var taskTitle = TASK_TITLE.replace(/{company}/g, companyName);
-            var taskDescription = TASK_DESCRIPTION.replace(/{company}/g, companyName);
+            var todayStr = today.toISOString().split('T')[0];
+            var dueStr = dueDate.toISOString().split('T')[0];
+            var localTime = today.toISOString().split('T')[0] + ' ' + 
+                today.toTimeString().split(' ')[0];
+            
+            // Build task summary
+            var taskSummary = TASK_TITLE.replace(/{company}/g, companyName);
             
             console.log('[ONYX] Creating task for company ID:', companyId);
             
-            // Create the task
+            // Create the task using todo_save.php
             $.ajax({
-                url: '/php_functions/task_save.php',
+                url: '/php_functions/todo_save.php',
                 type: 'POST',
                 dataType: 'json',
                 data: {
                     id: 0,
-                    title: taskTitle,
-                    description: taskDescription,
-                    due_date: dueDateStr,
-                    user_id: ASSIGNED_USER_ID,
-                    priority: 1,
+                    main_id: companyId,  // Link to company
+                    type: 2,             // 2 = Company type
+                    summary: taskSummary,
+                    dtstart: todayStr,
+                    due: dueStr,
                     status: 0,
-                    company_id: companyId
+                    priority: 1,
+                    user_id: ASSIGNED_USER_ID,
+                    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    local: localTime
                 },
                 success: function(response) {
-                    if (response && !response.error) {
+                    if (response && response.rows && response.rows.length > 0) {
                         console.log('[ONYX] ✓ Cleanup task created for: ' + companyName);
                         
                         // Try to show notification if available
