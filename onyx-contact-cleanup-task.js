@@ -23,7 +23,7 @@
     // User ID to assign the cleanup task to
     // To find your user ID: Settings → Users → Select user → look at URL or use API
     // Set to 0 to assign to the user who created the contact
-    var ASSIGNED_USER_ID = 0; // 0 = assign to creating user
+    var ASSIGNED_USER_ID = 1; // 1 = assign to creating user
     
     // How many days from now should the task be due?
     var TASK_DUE_DAYS = 2;
